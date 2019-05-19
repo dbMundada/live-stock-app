@@ -64,7 +64,6 @@ class OfflineGraph extends Component {
         }
       });
     });
-    console.log(data);
     return data;
   }
 
@@ -79,7 +78,6 @@ class OfflineGraph extends Component {
     const { stocks, historyData } = this.props;
     const selectedKeys = Object.keys(stocks).map(item => item);
     const data = this.generateGraphData(selectedKeys, historyData);
-    console.log(data);
 
     return (
       <div className="margin-top">

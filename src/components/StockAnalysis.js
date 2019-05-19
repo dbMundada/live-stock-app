@@ -22,7 +22,7 @@ class StockRow extends Component {
       <Col md="7">
         <Navbar expand="lg" variant="dark" bg="dark">
           <Container>
-            <Navbar.Brand href="#">
+            <Navbar.Brand>
               <Button variant="success"
                 size="sm"
                 onClick={this.toggleLiveData}>
