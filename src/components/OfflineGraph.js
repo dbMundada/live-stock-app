@@ -2,11 +2,23 @@ import React, { Component } from 'react';
 import FusionCharts from 'fusioncharts';
 import ReactFC from 'react-fusioncharts';
 import TimeSeries from "fusioncharts/fusioncharts.timeseries";
-import data from './data.json';
+import data from './../assets/data.json';
 
 ReactFC.fcRoot(FusionCharts, TimeSeries);
 
-class StockGraph extends Component {
+const schema = [{
+  name: "Time",
+  type: "date",
+  format: "%d-%b-%y"
+}, {
+  name: "Type",
+  type: "string"
+}, {
+  name: "Stocks Value",
+  type: "number"
+}];
+
+class OfflineGraph extends Component {
   constructor() {
     super();
     this.state = {
@@ -21,7 +33,7 @@ class StockGraph extends Component {
             text: "Stocks Analysis"
           },
           subcaption: {
-            text: "ABCD & XYZ & PQR"
+            text: "MSFT & EVA"
           },
           series: "Type",
           yaxis: [
@@ -38,25 +50,36 @@ class StockGraph extends Component {
     };
   }
 
+  generateGraphData(selectedKeys, historyData) {
+    const data = [];
+    Object.keys(historyData).forEach((timestamp, index) => {
+      const dateObj = new Date(timestamp * 1000);
+      let dateStr = dateObj.toLocaleTimeString();
+      historyData[timestamp].forEach(item => {
+        if (selectedKeys.indexOf(item[0])) {
+          let arrItem = [dateStr];
+          arrItem.push(item[0]);
+          arrItem.push(parseInt(item[1], 10));
+          data.push(arrItem);
+        }
+      });
+    });
+    console.log(data);
+    return data;
+  }
+
+
   componentDidMount() {
-    const schema = [{
-      name: "Time",
-      type: "date",
-      format: "%d-%b-%y"
-    }, {
-      name: "Type",
-      type: "string"
-    }, {
-      name: "Stocks Value",
-      type: "number"
-    }];
     const timeseriesDs = Object.assign({}, this.state.timeseriesDs);
     timeseriesDs.dataSource.data = new FusionCharts.DataStore().createDataTable(data, schema);
-
     this.setState({ timeseriesDs });
   }
+
   render() {
-    // let { stocks } = this.props;
+    const { stocks, historyData } = this.props;
+    const selectedKeys = Object.keys(stocks).map(item => item);
+    const data = this.generateGraphData(selectedKeys, historyData);
+    console.log(data);
 
     return (
       <div className="margin-top">
@@ -66,4 +89,4 @@ class StockGraph extends Component {
   }
 }
 
-export default StockGraph;
+export default OfflineGraph;

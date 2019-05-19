@@ -18,7 +18,7 @@ class StockRow extends Component {
     const color = this.getStockValueColor(stock.trend);
     return (
         <tr>
-          <td>{stock.name.toUpperCase()}</td>
+          <td>{stock.name}</td>
           <td style={{ color: color }}>{stock.value.toFixed(2)}</td>
           <td><StockTrendChart history={stock.history} color={color}/></td>
           <td>

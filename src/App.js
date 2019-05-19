@@ -1,30 +1,32 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Navbar, Button } from 'react-bootstrap';
+import { Row } from 'react-bootstrap';
 import './App.css';
-import RenderStockList from './components/RenderStockList';
-import StockGraph from './components/StockGraph';
+import WarningMsg from './components/WarningMsg';
+import StockList from './components/StockList';
+import StockAnalysis from './components/StockAnalysis';
 import { API } from './common/api';
-
+/*
+  stocks : {
+    TEST: {
+      name: 'TEST',
+      value: '',
+      trend: 0/1/2,
+      isSelected: false,
+      lastModified: '',
+      history: [
+        { value: 12, time: '' }
+      ]
+    }
+  }
+*/
 
 class App extends Component {
-  /*
-    stocks : {
-      TEST: {
-        name: 'TEST',
-        value: '',
-        trend: 0/1/2,
-        lastModified: '',
-        history: [
-          { value: 12, time: '' }
-        ]
-      }
-    }
-  */
-
   constructor() {
     super();
     this.state = {
-      stocks: {}
+      stocks: {},
+      historyData: {},
+      error: true
     };
   }
 
@@ -38,23 +40,29 @@ class App extends Component {
   }
 
   onNewMsgReceived(event) {
-    const { stocks } = this.state;
+    const { stocks, historyData } = this.state;
     let newstocks = JSON.parse(event.data);
+    const timeStamp = Date.now();
+
+    historyData[timeStamp] = [];
 
     newstocks.forEach(stock => {
-      const stockName = stock[0];
+      const stockName = stock[0].toUpperCase();
       const stockVal  = stock[1];
-      const timeStamp = Date.now();
+
+      historyData[timeStamp].push([ stockName, stockVal ]);
 
       if (stocks[stockName]) {
         let history = stocks[stockName].history;
-        history.push(stocks[stockName].value, stocks[stockName].timeStamp);
+
+        history.push([stocks[stockName].value, stocks[stockName].lastModified]);
 
         stocks[stockName] = {
           name: stockName,
           value: stockVal,
           trend: this.getTrend(stockVal, stocks[stockName].value),
           lastModified: timeStamp,
+          isSelected: true,
           history: history
         };
 
@@ -64,13 +72,15 @@ class App extends Component {
           value: stockVal,
           trend: 2,
           lastModified: timeStamp,
+          isSelected: true,
           history: []
         };
       }
     });
 
     this.setState({
-      stocks: stocks
+      stocks: stocks,
+      historyData: historyData
     });
   }
 
@@ -80,17 +90,20 @@ class App extends Component {
     this.socket.onmessage = this.onNewMsgReceived.bind(this);
     this.socket.onclose = (err) => {
       console.log('OnClose: ', err);
-      // this.setState({connectionError: true});
+      this.setState({ error: true });
     };
 
   }
 
-  renderStocks() {
-
+  clearAllData = () => {
+    this.setState({
+      stocks: {},
+      historyData: {},
+    });
   }
 
   render() {
-    const { stocks } = this.state;
+    const { stocks, historyData, error } = this.state;
     return [
       <head>
         <link
@@ -99,21 +112,12 @@ class App extends Component {
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
           crossorigin="anonymous"/>
       </head>,
+      error
+      ? <WarningMsg />
+      :
       <Row>
-        <Col md="7">
-          <Navbar expand="lg" variant="dark" bg="dark">
-            <Container>
-              <Navbar.Brand href="#">
-                <Button variant="success" size="sm">Live Data</Button>
-                &nbsp;&nbsp;&nbsp;Analysis
-              </Navbar.Brand>
-            </Container>
-          </Navbar>
-          <StockGraph stocks={stocks}/>
-        </Col>
-        <Col md="5">
-          <RenderStockList stocks={stocks}/>
-        </Col>
+        <StockAnalysis stocks={stocks} historyData={historyData} />
+        <StockList stocks={stocks} clearAllData={this.clearAllData}/>
       </Row>
     ];
   }

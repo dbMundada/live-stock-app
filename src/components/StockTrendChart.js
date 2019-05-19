@@ -3,8 +3,7 @@ import { AreaChart, Area } from 'recharts';
 
 class StockTrendChart extends Component {
   render() {
-    console.log(this.props.history);
-    const data = this.props.history.map(item => ({ uv: item || 0 }));
+    const data = this.props.history.map(item => ({ uv: item[0] || 0 }));
     return (
       <AreaChart
         width={130}
