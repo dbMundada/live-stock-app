@@ -1,0 +1,22 @@
+.App {
+  text-align: center;
+}
+
+.row {
+  margin-right: 0 !important;
+}
+
+.col-md-7,
+.col-md-5 {
+  padding-right: 0px !important;
+}
+
+
+
+.table td, .table th {
+    padding: .40rem !important;
+}
+
+.margin-top {
+  margin-top: 20px;
+}
